@@ -1,4 +1,4 @@
-// Package lox
+// Package lox implements the Lox programming language interpreter.
 package lox
 
 import (
@@ -9,10 +9,13 @@ import (
 )
 
 const (
-	ExitUsage   = 64
+	// ExitUsage is the exit code for incorrect command-line usage.
+	ExitUsage = 64
+	// ExitDataErr is the exit code for errors in the input data.
 	ExitDataErr = 65
 )
 
+// Lox is the main interpreter struct that tracks error state.
 type Lox struct {
 	hadError bool
 }
@@ -26,6 +29,10 @@ func (l *Lox) report(line int, where, message string) {
 	l.hadError = true
 }
 
+// Run executes the Lox interpreter with the given command-line arguments.
+// If no arguments are provided, it starts an interactive REPL.
+// If one argument is provided, it interprets that file.
+// Returns an exit status code.
 func (l *Lox) Run(args []string) int {
 	var exitStatus int
 	switch len(args) {
