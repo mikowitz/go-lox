@@ -79,6 +79,7 @@ func TestScanner_scanTokens(t *testing.T) {
 		expectedTypes  []TokenType
 		expectedCount  int
 		expectHadError bool
+		expectedError  string
 	}{
 		{
 			name:           "empty source",
@@ -338,6 +339,7 @@ func TestScanner_scanTokens(t *testing.T) {
 			expectedTypes:  []TokenType{EOF},
 			expectedCount:  1,
 			expectHadError: true,
+			expectedError:  "[line 1] Error : Unterminated string",
 		},
 		{
 			name:           "unterminated multiline string",
@@ -345,6 +347,7 @@ func TestScanner_scanTokens(t *testing.T) {
 			expectedTypes:  []TokenType{EOF},
 			expectedCount:  1,
 			expectHadError: true,
+			expectedError:  "[line 2] Error : Unterminated string",
 		},
 		{
 			name:           "integer number",
@@ -583,13 +586,22 @@ func TestScanner_scanTokens(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			scanner := NewScanner(tt.source, lox)
-			tokens := scanner.ScanTokens()
+
+			var tokens []Token
+			output, _ := captureOutput(func() error {
+				tokens = scanner.ScanTokens()
+				return nil
+			})
 
 			assert.Equal(t, tt.expectedCount, len(tokens))
 			assert.Equal(t, tt.expectHadError, lox.hadError)
 
 			for i, expectedType := range tt.expectedTypes {
 				assert.Equal(t, expectedType, tokens[i].TokenType, "token %d type mismatch", i)
+			}
+
+			if tt.expectedError != "" {
+				assert.Contains(t, output, tt.expectedError)
 			}
 		})
 	}
@@ -601,6 +613,7 @@ func TestScanner_scanToken(t *testing.T) {
 		source         string
 		expectedType   TokenType
 		expectHadError bool
+		expectedError  string
 		expectTokens   int
 	}{
 		{
@@ -677,12 +690,14 @@ func TestScanner_scanToken(t *testing.T) {
 			name:           "unexpected character",
 			source:         "@",
 			expectHadError: true,
+			expectedError:  "Unexpected character '@'",
 			expectTokens:   0,
 		},
 		{
 			name:           "another unexpected character",
 			source:         "#",
 			expectHadError: true,
+			expectedError:  "Unexpected character '#'",
 			expectTokens:   0,
 		},
 		{
@@ -779,6 +794,7 @@ func TestScanner_scanToken(t *testing.T) {
 			name:           "unterminated string",
 			source:         "\"hello",
 			expectHadError: true,
+			expectedError:  "Unterminated string",
 			expectTokens:   0,
 		},
 		{
@@ -885,13 +901,21 @@ func TestScanner_scanToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			scanner := NewScanner(tt.source, lox)
-			scanner.scanToken()
+
+			output, _ := captureOutput(func() error {
+				scanner.scanToken()
+				return nil
+			})
 
 			assert.Equal(t, tt.expectTokens, len(scanner.tokens))
 			assert.Equal(t, tt.expectHadError, lox.hadError)
 
 			if tt.expectTokens > 0 {
 				assert.Equal(t, tt.expectedType, scanner.tokens[0].TokenType)
+			}
+
+			if tt.expectedError != "" {
+				assert.Contains(t, output, tt.expectedError)
 			}
 		})
 	}
