@@ -70,14 +70,14 @@ func TestLox_Run(t *testing.T) {
 		{
 			name:               "single file arg",
 			args:               []string{"test.lox"},
-			fileContent:        "print \"hello\";",
+			fileContent:        "3 + 4 == 7",
 			expectHadError:     false,
 			expectedExitStatus: 0,
 		},
 		{
 			name:               "multiple single file args",
 			args:               []string{"test.lox", "foo.lox"},
-			fileContent:        "print \"hello\";",
+			fileContent:        "3 + 4 == 7",
 			expectHadError:     true,
 			expectedExitStatus: ExitUsage,
 		},

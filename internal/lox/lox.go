@@ -63,16 +63,30 @@ func (l *Lox) runPrompt() int {
 }
 
 func (l *Lox) runFile(filepath string) int {
-	if f, err := os.ReadFile(filepath); err == nil {
-		l.run(string(f))
+	f, err := os.ReadFile(filepath)
+	if err != nil {
+		return ExitDataErr
 	}
+	l.run(string(f))
 	if l.hadError {
-		// os.Exit(ExitDataErr)
 		return ExitDataErr
 	}
 	return 0
 }
 
 func (l *Lox) run(input string) {
-	// fmt.Printf("running:\n\n%s\n", input)
+	scanner := NewScanner(input, l)
+	tokens := scanner.ScanTokens()
+	parser := NewParser(tokens, l)
+	expr := parser.Parse()
+
+	// NOTE: `expr == nil` implies an invalid file input.
+	// If it is an empty file, l.hadError will be set,
+	// as is checked in `runFile` above
+	if l.hadError || expr == nil {
+		return
+	}
+
+	printer := NewAstPrinter()
+	fmt.Println(printer.Print(expr))
 }
