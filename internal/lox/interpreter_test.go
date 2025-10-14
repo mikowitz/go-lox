@@ -599,3 +599,183 @@ func TestInterpreter_Grouping(t *testing.T) {
 		})
 	}
 }
+
+func TestInterpreter_ErrorCases(t *testing.T) {
+	tests := []struct {
+		name string
+		expr Expr
+	}{
+		{
+			name: "multiplication with string",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+				Operator: Token{TokenType: Star, Lexeme: "*"},
+				Right:    Literal{Value: Token{TokenType: String, Literal: "hello"}},
+			},
+		},
+		{
+			name: "multiplication with boolean",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+				Operator: Token{TokenType: Star, Lexeme: "*"},
+				Right:    Literal{Value: Token{TokenType: True}},
+			},
+		},
+		{
+			name: "division with string",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: String, Literal: "hello"}},
+				Operator: Token{TokenType: Slash, Lexeme: "/"},
+				Right:    Literal{Value: Token{TokenType: Number, Literal: 2.0}},
+			},
+		},
+		{
+			name: "division with nil",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Nil}},
+				Operator: Token{TokenType: Slash, Lexeme: "/"},
+				Right:    Literal{Value: Token{TokenType: Number, Literal: 2.0}},
+			},
+		},
+		{
+			name: "greater than with string and number",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: String, Literal: "hello"}},
+				Operator: Token{TokenType: Greater, Lexeme: ">"},
+				Right:    Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+			},
+		},
+		{
+			name: "greater than with booleans",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: True}},
+				Operator: Token{TokenType: Greater, Lexeme: ">"},
+				Right:    Literal{Value: Token{TokenType: False}},
+			},
+		},
+		{
+			name: "greater than or equal with nil",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Nil}},
+				Operator: Token{TokenType: GreaterEqual, Lexeme: ">="},
+				Right:    Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+			},
+		},
+		{
+			name: "less than with strings",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: String, Literal: "abc"}},
+				Operator: Token{TokenType: Less, Lexeme: "<"},
+				Right:    Literal{Value: Token{TokenType: String, Literal: "xyz"}},
+			},
+		},
+		{
+			name: "less than or equal with mixed types",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+				Operator: Token{TokenType: LessEqual, Lexeme: "<="},
+				Right:    Literal{Value: Token{TokenType: String, Literal: "5"}},
+			},
+		},
+		{
+			name: "plus with number and string",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+				Operator: Token{TokenType: Plus, Lexeme: "+"},
+				Right:    Literal{Value: Token{TokenType: String, Literal: "hello"}},
+			},
+		},
+		{
+			name: "plus with string and number",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: String, Literal: "hello"}},
+				Operator: Token{TokenType: Plus, Lexeme: "+"},
+				Right:    Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+			},
+		},
+		{
+			name: "plus with boolean and number",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: True}},
+				Operator: Token{TokenType: Plus, Lexeme: "+"},
+				Right:    Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+			},
+		},
+		{
+			name: "plus with nil and string",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: Nil}},
+				Operator: Token{TokenType: Plus, Lexeme: "+"},
+				Right:    Literal{Value: Token{TokenType: String, Literal: "hello"}},
+			},
+		},
+		{
+			name: "minus with booleans",
+			expr: Binary{
+				Left:     Literal{Value: Token{TokenType: True}},
+				Operator: Token{TokenType: Minus, Lexeme: "-"},
+				Right:    Literal{Value: Token{TokenType: False}},
+			},
+		},
+		{
+			name: "unary minus on string",
+			expr: Unary{
+				Operator: Token{TokenType: Minus, Lexeme: "-"},
+				Right:    Literal{Value: Token{TokenType: String, Literal: "hello"}},
+			},
+		},
+		{
+			name: "unary minus on boolean",
+			expr: Unary{
+				Operator: Token{TokenType: Minus, Lexeme: "-"},
+				Right:    Literal{Value: Token{TokenType: True}},
+			},
+		},
+		{
+			name: "unary minus on nil",
+			expr: Unary{
+				Operator: Token{TokenType: Minus, Lexeme: "-"},
+				Right:    Literal{Value: Token{TokenType: Nil}},
+			},
+		},
+		{
+			name: "nested error in grouping",
+			expr: Grouping{
+				Expr: Binary{
+					Left:     Literal{Value: Token{TokenType: String, Literal: "hello"}},
+					Operator: Token{TokenType: Minus, Lexeme: "-"},
+					Right:    Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+				},
+			},
+		},
+		{
+			name: "error in complex nested expression",
+			expr: Binary{
+				Left: Grouping{
+					Expr: Binary{
+						Left:     Literal{Value: Token{TokenType: Number, Literal: 10.0}},
+						Operator: Token{TokenType: Plus, Lexeme: "+"},
+						Right:    Literal{Value: Token{TokenType: Number, Literal: 5.0}},
+					},
+				},
+				Operator: Token{TokenType: Star, Lexeme: "*"},
+				Right: Unary{
+					Operator: Token{TokenType: Minus, Lexeme: "-"},
+					Right:    Literal{Value: Token{TokenType: String, Literal: "oops"}},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lox := &Lox{}
+			i := NewInterpreter(lox)
+			_, err := i.Interpret(tt.expr)
+
+			if err == nil {
+				t.Errorf("Interpret() expected error but got none")
+			}
+		})
+	}
+}
