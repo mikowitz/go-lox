@@ -43,48 +43,42 @@ func (i *Interpreter) VisitBinary(b Binary) {
 	case GreaterEqual:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l >= r
 	case Less:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l < r
 	case LessEqual:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l <= r
 	case Minus:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l - r
 	case Slash:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l / r
 	case Star:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l * r
@@ -100,8 +94,10 @@ func (i *Interpreter) VisitBinary(b Binary) {
 			i.value = lStr + rStr
 			return
 		}
-		i.err = fmt.Errorf("operands to + must be two numbers or two strings")
-		i.lox.runtimeError(i.err, b.Operator.Line)
+		i.error(
+			fmt.Errorf("operands to + must be two numbers or two strings"),
+			b.Operator,
+		)
 	}
 }
 
@@ -187,4 +183,9 @@ func checkStrings(operator Token, left, right any) (string, string, error) {
 		"operands to %s must be strings, got %v, %v",
 		operator.Lexeme, l, r,
 	)
+}
+
+func (i *Interpreter) error(err error, token Token) {
+	i.err = err
+	i.lox.runtimeError(err, token.Line)
 }
