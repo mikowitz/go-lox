@@ -128,8 +128,10 @@ func (p *Parser) Primary() (Expr, error) {
 		}
 		expr = Grouping{Expr: innerExpr}
 	default:
-		p.error(p.peek(), "unexpected token")
-		return nil, fmt.Errorf("unexpected token")
+		token := p.peek()
+		errStr := fmt.Sprintf("unexpected token '%s'", token.Lexeme)
+		p.error(token, errStr)
+		return nil, fmt.Errorf("%s", errStr)
 	}
 
 	return expr, nil

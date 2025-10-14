@@ -475,7 +475,7 @@ func TestParser_Expression_Errors(t *testing.T) {
 				NewToken(EOF, "", nil, 1),
 			},
 			expectError:      true,
-			expectedErrorMsg: "unexpected token",
+			expectedErrorMsg: "unexpected token '+'",
 			expectNil:        true,
 		},
 		{
