@@ -13,15 +13,23 @@ const (
 	ExitUsage = 64
 	// ExitDataErr is the exit code for errors in the input data.
 	ExitDataErr = 65
+	// ExitInternalSoftware is the exit code for errors in the interpreter.
+	ExitInternalSoftware = 70
 )
 
 // Lox is the main interpreter struct that tracks error state.
 type Lox struct {
-	hadError bool
+	hadError        bool
+	hadRuntimeError bool
 }
 
 func (l *Lox) error(line int, message string) {
 	l.report(line, "", message)
+}
+
+func (l *Lox) runtimeError(err error, line int) {
+	fmt.Printf("%v\n[line %d]\n", err, line)
+	l.hadRuntimeError = true
 }
 
 func (l *Lox) report(line int, where, message string) {
@@ -67,8 +75,10 @@ func (l *Lox) runFile(filepath string) int {
 		l.run(string(f))
 	}
 	if l.hadError {
-		// os.Exit(ExitDataErr)
 		return ExitDataErr
+	}
+	if l.hadRuntimeError {
+		return ExitInternalSoftware
 	}
 	return 0
 }

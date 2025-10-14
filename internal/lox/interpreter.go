@@ -36,6 +36,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l > r
@@ -43,6 +44,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l >= r
@@ -50,6 +52,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l < r
@@ -57,6 +60,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l <= r
@@ -64,6 +68,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l - r
@@ -71,6 +76,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l / r
@@ -78,6 +84,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
 			i.err = err
+			i.lox.runtimeError(err, b.Operator.Line)
 			return
 		}
 		i.value = l * r
@@ -94,6 +101,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 			return
 		}
 		i.err = fmt.Errorf("operands to + must be two numbers or two strings")
+		i.lox.runtimeError(i.err, b.Operator.Line)
 	}
 }
 
