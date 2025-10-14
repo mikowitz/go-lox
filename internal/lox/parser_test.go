@@ -474,8 +474,9 @@ func TestParser_Expression_Errors(t *testing.T) {
 				NewToken(Plus, "+", nil, 1),
 				NewToken(EOF, "", nil, 1),
 			},
-			expectError: true,
-			expectNil:   true, // Parser returns nil without error for unexpected tokens
+			expectError:      true,
+			expectedErrorMsg: "unexpected token",
+			expectNil:        true,
 		},
 		{
 			name: "invalid character at beginning - star operator",
