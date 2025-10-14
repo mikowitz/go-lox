@@ -74,5 +74,14 @@ func (l *Lox) runFile(filepath string) int {
 }
 
 func (l *Lox) run(input string) {
-	// fmt.Printf("running:\n\n%s\n", input)
+	scanner := NewScanner(input, l)
+	tokens := scanner.ScanTokens()
+
+	parser := NewParser(tokens, l)
+	expr, err := parser.Parse()
+	if err != nil || expr == nil {
+		return
+	}
+	printer := NewAstPrinter()
+	fmt.Println(printer.Print(expr))
 }

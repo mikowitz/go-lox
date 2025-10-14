@@ -70,7 +70,7 @@ func TestLox_Run(t *testing.T) {
 		{
 			name:               "single file arg",
 			args:               []string{"test.lox"},
-			fileContent:        "print \"hello\";",
+			fileContent:        "true == false",
 			expectHadError:     false,
 			expectedExitStatus: 0,
 		},
@@ -119,12 +119,12 @@ func TestLox_runFile(t *testing.T) {
 		},
 		{
 			name:           "simple content",
-			content:        "print \"hello\";",
+			content:        "3 + 4",
 			expectHadError: false,
 		},
 		{
 			name:           "multiline content",
-			content:        "var x = 1;\nvar y = 2;\nprint x + y;",
+			content:        "3 * 2 -\n 17",
 			expectHadError: false,
 		},
 	}
@@ -157,11 +157,11 @@ func TestLox_run(t *testing.T) {
 		},
 		{
 			name:  "simple statement",
-			input: "print \"hello\";",
+			input: "3 + 1",
 		},
 		{
 			name:  "multiline input",
-			input: "var x = 1;\nvar y = 2;",
+			input: "3 + 1 / \n 3",
 		},
 	}
 
