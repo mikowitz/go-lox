@@ -126,6 +126,10 @@ func (i *Interpreter) VisitLiteral(l Literal) {
 
 func (i *Interpreter) VisitUnary(u Unary) {
 	u.Right.Accept(i)
+	if i.err != nil {
+		i.error(i.err, u.Operator)
+		return
+	}
 
 	switch u.Operator.TokenType {
 	case Minus:
