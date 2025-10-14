@@ -82,6 +82,12 @@ func (l *Lox) run(input string) {
 	if err != nil || expr == nil {
 		return
 	}
-	printer := NewAstPrinter()
-	fmt.Println(printer.Print(expr))
+
+	interpreter := NewInterpreter(l)
+	v, err := interpreter.Interpret(expr)
+	if err != nil {
+		l.hadError = true
+		return
+	}
+	fmt.Printf("%v\n", v)
 }
