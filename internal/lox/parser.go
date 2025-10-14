@@ -13,89 +13,116 @@ func NewParser(tokens []Token, lox *Lox) Parser {
 	return Parser{tokens: tokens, lox: lox}
 }
 
-func (p *Parser) Parse() Expr {
-	if p.isAtEnd() {
-		return nil
-	}
+func (p *Parser) Parse() (Expr, error) {
 	return p.Expression()
 }
 
-func (p *Parser) Expression() Expr {
+func (p *Parser) Expression() (Expr, error) {
 	return p.Equality()
 }
 
-func (p *Parser) Equality() Expr {
-	expr := p.Comparison()
+func (p *Parser) Equality() (Expr, error) {
+	expr, err := p.Comparison()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(BangEqual, EqualEqual) {
 		operator := p.previous()
-		right := p.Comparison()
+		right, err := p.Comparison()
+		if err != nil {
+			return nil, err
+		}
 		expr = Binary{Left: expr, Operator: operator, Right: right}
 	}
 
-	return expr
+	return expr, nil
 }
 
-func (p *Parser) Comparison() Expr {
-	expr := p.Term()
+func (p *Parser) Comparison() (Expr, error) {
+	expr, err := p.Term()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(Greater, GreaterEqual, Less, LessEqual) {
 		operator := p.previous()
-		right := p.Term()
+		right, err := p.Term()
+		if err != nil {
+			return nil, err
+		}
 		expr = Binary{Left: expr, Operator: operator, Right: right}
 	}
-	return expr
+	return expr, nil
 }
 
-func (p *Parser) Term() Expr {
-	expr := p.Factor()
+func (p *Parser) Term() (Expr, error) {
+	expr, err := p.Factor()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(Minus, Plus) {
 		operator := p.previous()
-		right := p.Factor()
+		right, err := p.Factor()
+		if err != nil {
+			return nil, err
+		}
 		expr = Binary{Left: expr, Operator: operator, Right: right}
 	}
-	return expr
+	return expr, nil
 }
 
-func (p *Parser) Factor() Expr {
-	expr := p.Unary()
+func (p *Parser) Factor() (Expr, error) {
+	expr, err := p.Unary()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(Slash, Star) {
 		operator := p.previous()
-		right := p.Unary()
+		right, err := p.Unary()
+		if err != nil {
+			return nil, err
+		}
 		expr = Binary{Left: expr, Operator: operator, Right: right}
 	}
-	return expr
+	return expr, nil
 }
 
-func (p *Parser) Unary() Expr {
+func (p *Parser) Unary() (Expr, error) {
 	if p.match(Bang, Minus) {
 		operator := p.previous()
-		right := p.Unary()
-		return Unary{Operator: operator, Right: right}
+		right, err := p.Unary()
+		if err != nil {
+			return nil, err
+		}
+		return Unary{Operator: operator, Right: right}, nil
 	}
 	return p.Primary()
 }
 
-func (p *Parser) Primary() Expr {
+func (p *Parser) Primary() (Expr, error) {
 	var e Expr
 	switch {
 	case p.match(False, True, Nil, Number, String):
 		e = Literal{Value: p.previous()}
 	case p.match(LeftParen):
-		expr := p.Expression()
+		expr, err := p.Expression()
+		if err != nil {
+			return nil, err
+		}
 		t, err := p.consume(RightParen, "Expect ')' after expression")
 		if err != nil {
 			p.error(t, err.Error())
-			return e
+			return nil, err
 		}
 		e = Grouping{Expr: expr}
 	default:
 		p.error(p.peek(), "Expect expression")
-		return nil
+		return nil, fmt.Errorf("expect expression")
 	}
-	return e
+	return e, nil
 }
 
 //nolint:unused

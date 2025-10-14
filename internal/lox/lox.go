@@ -78,12 +78,12 @@ func (l *Lox) run(input string) {
 	scanner := NewScanner(input, l)
 	tokens := scanner.ScanTokens()
 	parser := NewParser(tokens, l)
-	expr := parser.Parse()
+	expr, err := parser.Parse()
 
 	// NOTE: `expr == nil` implies an invalid file input.
 	// If it is an empty file, l.hadError will be set,
 	// as is checked in `runFile` above
-	if l.hadError || expr == nil {
+	if l.hadError || err != nil {
 		return
 	}
 

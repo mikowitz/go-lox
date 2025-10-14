@@ -58,7 +58,8 @@ func TestParser_Literal(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, err := parser.Parse()
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -104,7 +105,8 @@ func TestParser_Grouping(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, err := parser.Parse()
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -178,7 +180,8 @@ func TestParser_Unary(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, err := parser.Parse()
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -308,7 +311,8 @@ func TestParser_Binary(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, err := parser.Parse()
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -388,7 +392,8 @@ func TestParser_Precedence(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, err := parser.Parse()
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -483,7 +488,8 @@ func TestParser_Complex(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, err := parser.Parse()
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -603,7 +609,7 @@ func TestParser_Errors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			lox := &Lox{}
 			parser := NewParser(tt.tokens, lox)
-			result := parser.Parse()
+			result, _ := parser.Parse()
 
 			assert.Equal(t, tt.expectHadError, lox.hadError, "hadError flag mismatch")
 			assert.Nil(t, result, "result mismatch")
