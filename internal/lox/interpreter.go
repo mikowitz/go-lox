@@ -2,7 +2,6 @@ package lox
 
 import (
 	"fmt"
-	"log"
 )
 
 type Interpreter struct {
@@ -17,14 +16,23 @@ func NewInterpreter(lox *Lox) Interpreter {
 
 func (i *Interpreter) Interpret(e Expr) (any, error) {
 	i.value = nil
+	i.err = nil
 	e.Accept(i)
 	return i.value, i.err
 }
 
 func (i *Interpreter) VisitBinary(b Binary) {
 	b.Left.Accept(i)
+	if i.err != nil {
+		i.error(i.err, b.Operator)
+		return
+	}
 	left := i.value
 	b.Right.Accept(i)
+	if i.err != nil {
+		i.error(i.err, b.Operator)
+		return
+	}
 	right := i.value
 
 	switch b.Operator.TokenType {
@@ -35,8 +43,7 @@ func (i *Interpreter) VisitBinary(b Binary) {
 	case Greater:
 		l, r, err := checkNumbers(b.Operator, left, right)
 		if err != nil {
-			i.err = err
-			i.lox.runtimeError(err, b.Operator.Line)
+			i.error(err, b.Operator)
 			return
 		}
 		i.value = l > r
@@ -84,7 +91,6 @@ func (i *Interpreter) VisitBinary(b Binary) {
 		i.value = l * r
 	case Plus:
 		l, r, err := checkNumbers(b.Operator, left, right)
-		log.Printf("got %v, %v, %v", l, r, err)
 		if err == nil {
 			i.value = l + r
 			return
@@ -125,7 +131,7 @@ func (i *Interpreter) VisitUnary(u Unary) {
 	case Minus:
 		f, err := checkNumber(u.Operator, i.value)
 		if err != nil {
-			i.err = err
+			i.error(err, u.Operator)
 			return
 		}
 		i.value = -f
@@ -167,8 +173,8 @@ func checkNumbers(operator Token, left, right any) (float64, float64, error) {
 	}
 
 	return l, r, fmt.Errorf(
-		"operands to %s must be numbers, got %v, %v",
-		operator.Lexeme, l, r,
+		"operands to %s must be numbers, got %T, %T",
+		operator.Lexeme, left, right,
 	)
 }
 
@@ -180,8 +186,8 @@ func checkStrings(operator Token, left, right any) (string, string, error) {
 	}
 
 	return l, r, fmt.Errorf(
-		"operands to %s must be strings, got %v, %v",
-		operator.Lexeme, l, r,
+		"operands to %s must be strings, got %T, %T",
+		operator.Lexeme, left, right,
 	)
 }
 
